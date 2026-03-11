@@ -13,5 +13,5 @@ get_genome -> Try it out -> Execute
 
 3. Unity project
 Open project stored in /unity_sim/body-brain-coevolution-unity/
-Run project
+Select the play/run button
 Watch for correspondence between Unity project console and terminal running Dockerfile
