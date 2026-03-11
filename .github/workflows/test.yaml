@@ -1,0 +1,45 @@
+name: Run Unity Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  testAllModes:
+    name: Test in All Modes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v3
+        with:
+          # Pointing to the specific Library folder inside your nested project
+          path: unity_sim/body-brain-coevolution-unity/Library
+          key: Library-unity_sim-${{ hashFiles('unity_sim/body-brain-coevolution-unity/Assets/**', 'unity_sim/body-brain-coevolution-unity/Packages/**', 'unity_sim/body-brain-coevolution-unity/ProjectSettings/**') }}
+          restore-keys: |
+            Library-unity_sim-
+
+      - name: Run Unity Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          # Pointing to the folder that contains your Assets/ProjectSettings
+          projectPath: unity_sim/body-brain-coevolution-unity
+          unityVersion: 6000.3.10f1
+          testMode: all
+          artifactsPath: artifacts
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test results
+          path: artifacts
