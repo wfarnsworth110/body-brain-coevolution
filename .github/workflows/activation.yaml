@@ -1,5 +1,10 @@
 name: Get Unity License File
-on: workflow_dispatch # Run manually from GitHub Actions tab
+# Run upon any push to any branch, or manually from the Actions tab
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
 
 jobs:
   activation:
