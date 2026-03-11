@@ -1,0 +1,17 @@
+name: Get Unity License File
+on: workflow_dispatch # Run manually from GitHub Actions tab
+
+jobs:
+  activation:
+    name: Request Activation File (.alf)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request manual activation file
+        uses: game-ci/unity-request-activation-file@v4
+        with:
+          unityVersion: 6000.3.10f1 # Matching my Unity version
+      - name: Upload activation file
+        uses: actions/upload-artifact@v4
+        with:
+          name: activation-file
+          path: ${{ steps.get-alf.outputs.filePath }}
