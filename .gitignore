@@ -100,3 +100,4 @@ InitTestScene*.unity*
 
 # Additional files to ignore (outside of the default Unity .gitignore template)
 .vscode/
+.DS_Store
