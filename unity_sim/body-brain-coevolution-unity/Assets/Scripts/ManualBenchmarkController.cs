@@ -36,6 +36,7 @@ public class ManualBenchmarkController : MonoBehaviour
         float rightPhase = Mathf.Sin(time + Mathf.PI); // Opposite phase for right leg
 
         // Calculate hip target angles
+        // Debug.Log($"Left Hip Target: {leftPhase * hipAmplitude}"); // Check hip target values
         float leftHipTarget = leftPhase * hipAmplitude;
         float rightHipTarget = rightPhase * hipAmplitude;
 
