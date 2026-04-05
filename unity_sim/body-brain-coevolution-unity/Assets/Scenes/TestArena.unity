@@ -589,7 +589,7 @@ GameObject:
   - component: {fileID: 890683377}
   - component: {fileID: 890683376}
   - component: {fileID: 890683375}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1765,8 +1765,8 @@ MonoBehaviour:
   rightKnee: {fileID: 195997617}
   rightAnkle: {fileID: 1623242478}
   walkSpeed: 3
-  hipAmplitude: 30
-  hipOffset: 15
+  hipAmplitude: 20
+  hipOffset: 10
   kneeAmplitude: 40
   kneeOffset: 45
   ankleAmplitude: 20
