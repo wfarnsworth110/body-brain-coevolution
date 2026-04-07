@@ -61,7 +61,6 @@ async def get_genome():
         current_generation += 1
         current_ind_index = 0
     
-    # TODO Fix for 422 Unprocessable Entity error - likely due to data format issues between Python and Unity
     ind = population[current_ind_index]
     return GenomeResponse(
         individual_id=current_ind_index,
