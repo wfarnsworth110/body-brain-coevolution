@@ -15,7 +15,7 @@ creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
 # 64 floats for morphology 64 for neural weights and biases = 128 total
-toolbox.register("attr_float", random.uniform, -1.0, 1.0)
+toolbox.register("attr_float", random.uniform, 0.0, 1.0) # Easier to write to Unity as floats between 0 and 1, can be scaled in Unity
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=128)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
@@ -23,30 +23,52 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 population = toolbox.population(n=20)
 current_ind_index = 0
 
+""" Generation Tracking """
+current_generation = 1
+max_generations = 100 # TODO This can be adjusted
+
 """ API Models """
 class FitnessReport(BaseModel):
     individual_id: int
     fitness_score: float
+    generation: int # Unity sends this information too
 
 class GenomeResponse(BaseModel):
     individual_id: int
     dna: List[float]
+    generation: int
+    is_finished: bool
 
 """ Endpoints """
 # Unity will call this to get the next genome to evaluate
-# TODO Fix placeholder logic to trigger next generation after all individuals have been evaluated
 @app.get("/get-genome", response_model=GenomeResponse)
 async def get_genome():
-    global current_ind_index
+    global current_ind_index, current_generation
+
+    # Check if the current generation is finished
+    if current_generation > max_generations:
+        return GenomeResponse(
+            individual_id=-1,
+            dna=[],
+            generation=current_generation,
+            is_finished=True
+        )
+
     if current_ind_index >= len(population):
-        # TODO Trigger the next generation via crossover/mutation
-        # For now, just loop for testing
+        # TODO Insert DEAP evolutionary algorithm steps here (selection, crossover, mutation)
+        # This block triggers when a generation is complete
+
+        current_generation += 1
         current_ind_index = 0
     
     ind = population[current_ind_index]
-    return {"individual_id": current_ind_index, "dna": list(ind)}
+    return GenomeResponse(
+        individual_id=current_ind_index,
+        dna=list(ind),
+        generation=current_generation,
+        is_finished=False
+    )
 
-# Unity will call this after the 10-second simulation is done
 @app.post("/post-fitness")
 async def post_fitness(report: FitnessReport):
     global current_ind_index
@@ -54,7 +76,7 @@ async def post_fitness(report: FitnessReport):
     # Assign the fitness to the DEAP individual
     population[report.individual_id].fitness.values = (report.fitness_score,)
 
-    print(f"Received {report.individual_id} scored: {report.fitness_score}")
+    print(f"Gen {report.generation} | Ind {report.individual_id} scored: {report.fitness_score}")
     current_ind_index += 1
 
-    return {"status": "success", "next_steps": "Request next genome"}
+    return {"Status": "Success"}
