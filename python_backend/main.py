@@ -9,16 +9,17 @@ app = FastAPI(title="Body-Brain Co-evolution API")
 
 """ DEAP setup """
 # Fitness metric: Maximize distance traveled
+# TODO Implement specific fitness function that considers multiple factors (details in Discord)
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
-# Example DNA: 10 floats (5 for morphology, 5 for neural weights)
+# 64 floats for morphology 64 for neural weights and biases = 128 total
 toolbox.register("attr_float", random.uniform, -1.0, 1.0)
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=10)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=128)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-# Initialize a global population
+# TODO Dial in population size, mutation rate, crossover rate, and selection method
 population = toolbox.population(n=20)
 current_ind_index = 0
 
@@ -33,6 +34,7 @@ class GenomeResponse(BaseModel):
 
 """ Endpoints """
 # Unity will call this to get the next genome to evaluate
+# TODO Fix placeholder logic to trigger next generation after all individuals have been evaluated
 @app.get("/get-genome", response_model=GenomeResponse)
 async def get_genome():
     global current_ind_index
