@@ -2,14 +2,12 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 import random
-import numpy as np
-from deap import base, creator, tools, algorithms
+from deap import base, creator, tools
 
 app = FastAPI(title="Body-Brain Co-evolution API")
 
 """ DEAP setup """
 # Fitness metric: Maximize distance traveled
-# TODO Implement specific fitness function that considers multiple factors (details in Discord)
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
@@ -19,8 +17,18 @@ toolbox.register("attr_float", random.uniform, 0.0, 1.0) # Easier to write to Un
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=128)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-# TODO Dial in population size, mutation rate, crossover rate, and selection method
-population = toolbox.population(n=20)
+POPULATION_SIZE = 20
+TOURNAMENT_SIZE = 3
+CXPB = 0.7
+MU = 0.0
+SIGMA = 0.05
+INDPB = 0.1
+
+toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
+toolbox.register("mate", tools.cxTwoPoint)
+toolbox.register("mutate", tools.mutGaussian, mu=MU, sigma=SIGMA, indpb=INDPB)
+
+population = toolbox.population(n=POPULATION_SIZE)
 current_ind_index = 0
 
 """ Generation Tracking """
@@ -43,9 +51,8 @@ class GenomeResponse(BaseModel):
 # Unity will call this to get the next genome to evaluate
 @app.get("/get-genome", response_model=GenomeResponse)
 async def get_genome():
-    global current_ind_index, current_generation
+    global current_ind_index, current_generation, population
 
-    # Check if the current generation is finished
     if current_generation > max_generations:
         return GenomeResponse(
             individual_id=-1,
@@ -55,12 +62,36 @@ async def get_genome():
         )
 
     if current_ind_index >= len(population):
-        # TODO Insert DEAP evolutionary algorithm steps here (selection, crossover, mutation)
-        # This block triggers when a generation is complete
+        if current_generation >= max_generations:
+            current_generation += 1
+            return GenomeResponse(
+                individual_id=-1,
+                dna=[],
+                generation=current_generation,
+                is_finished=True
+            )
 
+        offspring = toolbox.select(population, len(population))
+        offspring = [toolbox.clone(ind) for ind in offspring]
+
+        for i in range(1, len(offspring), 2):
+            if random.random() < CXPB:
+                offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1], offspring[i])
+                del offspring[i - 1].fitness.values
+                del offspring[i].fitness.values
+
+        for mutant in offspring:
+            toolbox.mutate(mutant)
+            del mutant.fitness.values
+
+        for ind in offspring:
+            for i in range(len(ind)):
+                ind[i] = max(0.0, min(1.0, ind[i]))
+
+        population[:] = offspring
         current_generation += 1
         current_ind_index = 0
-    
+
     ind = population[current_ind_index]
     return GenomeResponse(
         individual_id=current_ind_index,
@@ -72,6 +103,18 @@ async def get_genome():
 @app.post("/post-fitness")
 async def post_fitness(report: FitnessReport):
     global current_ind_index
+
+    if report.generation != current_generation:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Generation mismatch: expected {current_generation}, got {report.generation}"
+        )
+
+    if report.individual_id < 0 or report.individual_id >= len(population):
+        raise HTTPException(
+            status_code=400,
+            detail=f"individual_id {report.individual_id} out of range [0, {len(population) - 1}]"
+        )
 
     # Assign the fitness to the DEAP individual
     population[report.individual_id].fitness.values = (report.fitness_score,)
