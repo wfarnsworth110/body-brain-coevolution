@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Define the image name
 IMAGE_NAME="evo-api"
