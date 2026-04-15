@@ -44,6 +44,9 @@ public class GenomeClient : MonoBehaviour
             {
                 GenomeResponse response = JsonUtility.FromJson<GenomeResponse>(webRequest.downloadHandler.text);
 
+                // Start the simulation trial with the received genome
+                SimulationManager.Instance.BeginTrial(response.individual_id, response.generation, response.dna);
+
                 // Exit condition if all generations are finished
                 if (response.is_finished)
                 {
@@ -54,10 +57,10 @@ public class GenomeClient : MonoBehaviour
                 lastReceivedGeneration = response.generation; // Store the generation for fitness reporting
                 Debug.Log($"Gen {response.generation} | Received ID {response.individual_id}");
 
-                // TODO Genome Translator logic (script not yet implemented)
-                // GenomeTranslator.Instance.ApplyGenome(response.dna);
+                // TODO: Finish Genome Translator functionality
+                GenomeTranslator.Instance.ApplyGenome(response.dna);
 
-                // TODO Placeholder: Wait 10 seconds in the simultation
+                // TODO: Placeholder: Wait 10 seconds in the simultation
                 float mockFitness = Random.Range(0f, 15f); // Mock fitness score for testing
                 SendFitness(response.individual_id, lastReceivedGeneration, mockFitness);
             }

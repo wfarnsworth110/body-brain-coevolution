@@ -1,0 +1,79 @@
+using UnityEngine;
+using System.Collections;
+
+public class SimulationManager : MonoBehaviour
+{
+    public static SimulationManager Instance;
+
+    [Header("Trial Settings")]
+    public float trialDuration = 10.0f;
+    public float heightThreshold = 0.4f; // If the torso falls below this, trial ends
+    public Transform torsoTransform;
+
+    private Vector3 startPosition;
+    private bool isSimulating = false;
+    private int currentIndividualId;
+    private int currentGen;
+
+    private void Awake() => Instance = this;
+
+    public void BeginTrial(int id, int gen, float[] dna)
+    {
+        currentIndividualId = id;
+        currentGen = gen;
+
+        // 1. Reset Physics State (Teleport to start, zero out velocities)
+        ResetRobot();
+
+        // 2. Morph the robot based on DNA
+        GenomeTranslator.Instance.ApplyGenome(dna);
+
+        // 3. Start the timer
+        startPosition = torsoTransform.position;
+        StartCoroutine(TrialRoutine());
+    }
+
+    private IEnumerator TrialRoutine()
+    {
+        isSimulating = true;
+        float elapsed = 0.0f;
+
+        while (elapsed < trialDuration)
+        {
+            // Exit early if robot falls over
+            if (torsoTransform.position.y < heightThreshold)
+            {
+                Debug.Log("Robot fell! Ending trial early.");
+                break;
+            }
+
+            elapsed += Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+        }
+
+        EndTrial();
+    }
+
+    private void EndTrial()
+    {
+        isSimulating = false;
+
+        // Calculate Fitness: Simple X-distance traveled
+        float distanceX = torsoTransform.position.x - startPosition.x;
+
+        // Penalize for drifting off the z-axis (lateral instability)
+        float penaltyZ = Mathf.Abs(torsoTransform.position.z - startPosition.z) * 0.5f;
+
+        float finalFitness = Mathf.Max(0, distanceX - penaltyZ);
+
+        Debug.Log($"Trial Done. Fitness: {finalFitness}");
+
+        // Report back to the Python server via GenomeClient
+        GetComponent<GenomeClient>().SendFitness(currentIndividualId, currentGen, finalFitness);
+    }
+
+    private void ResetRobot()
+    {
+        // TODO: Reset position to (0, 1, 0) and clear all ArticulationBody velocities
+    }
+}
