@@ -52,6 +52,12 @@ public class GenomeTranslator : MonoBehaviour
     private readonly Vector2 stiffnessRange = new Vector2(0f, 10000f);
     private readonly Vector2 dampingRange = new Vector2(0f, 1000f);
 
+    [Header("The Brain")]
+    public NeuralController brain;
+
+    [Header("Global Modifiers")]
+    public float globalMotorMultiplier = 1.0f;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -74,8 +80,20 @@ public class GenomeTranslator : MonoBehaviour
         ApplySegmentTraits(leftFoot, dna, 40);
         ApplySegmentTraits(rightFoot, dna, 48);
 
-        // TODO: Apply Global Morphology (56-63)
-        // TODO: Map Neural Network Weights (64-127)
+        // Apply Global Morphology (56-63)
+        // 56 - Global Motor Multiplier
+        // 57-63 - Either junk DNA or additional global parameters (not implemented yet)
+        globalMotorMultiplier = Mathf.Lerp(0.5f, 3.0f, dna[56]);
+
+        // Map Neural Network Weights (64-127)
+        if (brain != null)
+        {
+            brain.InitializeNetwork(dna, 64);
+        }
+        else
+        {
+            Debug.LogWarning("NeuralController reference not set in GenomeTranslator.");
+        }
     }
 
     private void ApplySegmentTraits(ArticulationBody segment, float[] dna, int startIndex)
