@@ -74,6 +74,30 @@ public class SimulationManager : MonoBehaviour
 
     private void ResetRobot()
     {
-        // TODO: Reset position to (0, 1, 0) and clear all ArticulationBody velocities
+        if (torsoTransform == null)
+        {
+            Debug.LogError("SimulationManager.ResetRobot called without a torsoTransform reference.");
+            return;
+        }
+
+        ArticulationBody rootBody = torsoTransform.GetComponent<ArticulationBody>();
+        if (rootBody == null)
+        {
+            Debug.LogError("SimulationManager.ResetRobot could not find an ArticulationBody on torsoTransform.");
+            return;
+        }
+
+        ArticulationBody[] bodies = torsoTransform.GetComponentsInChildren<ArticulationBody>();
+
+        // Reset full articulation root transform to the start pose.
+        rootBody.TeleportRoot(new Vector3(0, 1.5f, 0), Quaternion.identity);
+
+        foreach (ArticulationBody body in bodies)
+        {
+            body.jointVelocity = new ArticulationReducedSpace(0f);
+            // Unity 6 does not allow setting jointAcceleration directly.
+            body.jointForce = new ArticulationReducedSpace(0f);
+            body.jointPosition = new ArticulationReducedSpace(0f);
+        }
     }
 }

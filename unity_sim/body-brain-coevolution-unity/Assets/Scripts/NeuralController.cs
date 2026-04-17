@@ -98,4 +98,10 @@ public class NeuralController : MonoBehaviour
 
         return outputLayer;
     }
+
+    // Fixed Update loop to call the existing functionality
+    void FixedUpdate()
+    {
+        
+    }
 }
