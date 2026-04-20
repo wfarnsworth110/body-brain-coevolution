@@ -7,7 +7,8 @@ public class AgentLocomotion : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (GenomeTranslator.Instance == null || GenomeTranslator.Instance.brain == null)
+        // Safety check to ensure brain is ready before trying to control joints
+        if (GenomeTranslator.Instance == null || GenomeTranslator.Instance.brain == null || !GenomeTranslator.Instance.brain.isInitialized)
         {
             return;
         }

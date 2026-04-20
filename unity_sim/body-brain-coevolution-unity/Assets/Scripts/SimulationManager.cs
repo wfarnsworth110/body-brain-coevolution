@@ -100,4 +100,32 @@ public class SimulationManager : MonoBehaviour
             body.jointPosition = new ArticulationReducedSpace(0f);
         }
     }
+
+    [ContextMenu("Test Single Dummy Individual")]
+    public void TestSingleIndividual()
+    {
+        float[] dummyDNA = new float[128];
+        for(int i = 0; i < 128; i++) dummyDNA[i] = 0.5f; // Middle-of-the-road traits
+    
+        BeginTrial(999, 1, dummyDNA);
+    }
+
+    [ContextMenu("Test Random Individual")]
+    public void TestRandomIndividual()
+    {
+        // Random seed (optional)
+        // Random.InitState(System.DateTime.Now.Millisecond);
+        // Random.InitState(42);
+
+        float[] randomDNA = new float[128];
+        for(int i = 0; i < 128; i++)
+        {
+            // Random value between 0 and 1
+            randomDNA[i] = UnityEngine.Random.value;
+        }
+
+        Debug.Log("Testing random individual");
+
+        BeginTrial(888, 1, randomDNA);
+    }
 }

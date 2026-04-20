@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class NeuralController : MonoBehaviour
 {
+    public bool isInitialized = false;
+    
     [Header("Network Dimensions")]
     private readonly int inputNodes = 6;
     private readonly int hiddenNodes = 4;
@@ -62,6 +64,8 @@ public class NeuralController : MonoBehaviour
         {
             biasesOutput[o] = Mathf.Lerp(biasRange.x, biasRange.y, dna[ptr++]);
         }
+
+        isInitialized = true;
 
         // Note: 58 of 64 floats used; remaining 6 for global parameters or junk DNA.
     }
