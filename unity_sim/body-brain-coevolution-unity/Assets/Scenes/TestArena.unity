@@ -685,7 +685,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 100}
+  m_LocalScale: {x: 100, y: 1, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1802,6 +1802,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d872ccf8ed3b646a0bbb52830d405c76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MainProject::NeuralController
+  isInitialized: 0
 --- !u!114 &2145487444
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1835,6 +1836,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98cc0309c3e6e48b891b83a711de479f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  maxTargetAngle: 45
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
