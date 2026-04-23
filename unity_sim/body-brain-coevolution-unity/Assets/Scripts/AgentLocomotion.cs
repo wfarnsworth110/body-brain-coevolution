@@ -36,7 +36,7 @@ public class AgentLocomotion : MonoBehaviour
             ArticulationDrive drive = joint.xDrive;
             float lower = drive.lowerLimit;
             float upper = drive.upperLimit;
-            float current = joint.jointPosition[0];
+            float current = joint.jointPosition[0] * Mathf.Rad2Deg; // Convert from radians to degrees
 
             if (Mathf.Abs(upper - lower) < Mathf.Epsilon)
             {

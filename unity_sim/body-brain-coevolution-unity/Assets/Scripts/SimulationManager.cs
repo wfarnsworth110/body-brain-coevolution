@@ -14,8 +14,8 @@ public class SimulationManager : MonoBehaviour
 
     // Fitness function information
     [Header("Fitness Weights")]
-    public float w1_torque = 0.001f;
-    public float w2_zDrift = 0.5f;
+    public float w1_torque = 0.0001f;
+    public float w2_zDrift = 0.0005f;
 
     private float cumulativeTorque = 0f;
     private float cumulativeZDrift = 0f;
@@ -80,7 +80,7 @@ public class SimulationManager : MonoBehaviour
             {
                 if (!body.isRoot && body.dofCount > 0)
                 {
-                    currentTorque += Mathf.Abs(body.jointForce[0]);
+                    currentTorque += Mathf.Abs(body.jointVelocity[0]);
                 }
             }
             cumulativeTorque += (w1_torque * currentTorque);
