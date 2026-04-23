@@ -55,11 +55,12 @@ class GenomeResponse(BaseModel):
     is_finished: bool
 
 def save_run_data():
-    """Exports Logbook to CSV and HoF to JSON for reusability."""
-    os.makedirs("results", exist_ok=True)
+    """Exports Logbook to CSV and HoF to JSON for reusability, now modified for ablation experiment of no z-axis penalty."""
+    target_dir = "results_no_z" # Altered "results" to "results_no_z"
+    os.makedirs(target_dir, exist_ok=True)
 
     # Save CSV for plots
-    csv_path = f"results/run_{current_run}_log.csv"
+    csv_path = f"{target_dir}/run_{current_run}_log.csv"
     with open(csv_path, "w", newline='') as f:
         writer = csv.DictWriter(f, fieldnames=logbook.header)
         writer.writeheader()
@@ -67,11 +68,11 @@ def save_run_data():
     
     # Save JSON for Unity playback
     elites = [{"rank": i+1, "fitness": ind.fitness.values[0], "dna": list(ind)} for i, ind in enumerate(hof)]
-    json_path = f"results/run_{current_run}_elites.json"
+    json_path = f"{target_dir}/run_{current_run}_elites.json"
     with open(json_path, "w") as f:
         json.dump(elites, f, indent=4)
     
-    print(f"Run {current_run} complete. Data saved to /results/.")
+    print(f"Run {current_run} complete. Data saved to {target_dir}/.")
 
 @app.get("/get-genome", response_model=GenomeResponse)
 async def get_genome():

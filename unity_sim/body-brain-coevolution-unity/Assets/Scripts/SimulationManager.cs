@@ -108,13 +108,15 @@ public class SimulationManager : MonoBehaviour
             - w1 * cumulativeTorque penalizes excessive torque usage.
             - w2 * cumulativeZDrift penalizes drifting away from the center line.
         */
-        float finalFitness = (distanceX / validTime) - cumulativeTorque - cumulativeZDrift;
+        // float finalFitness = (distanceX / validTime) - cumulativeTorque - cumulativeZDrift;
+        // Ablation study: Fitness score with no z-axis penalty
+        float finalFitnessNoZ = (distanceX / validTime) - cumulativeTorque; // For comparison in ablation study
 
         // Ensure fitness is not negative
-        finalFitness = Mathf.Max(0f, finalFitness);
+        finalFitnessNoZ = Mathf.Max(0f, finalFitnessNoZ);
 
-        Debug.Log($"Gen {currentGen} Ind {currentIndividualId} | Fit: {finalFitness:F3} | Dist: {distanceX:F2} | Torque Pen: {cumulativeTorque:F2} | Z-Pen: {cumulativeZDrift:F2}");
-        GetComponent<GenomeClient>().SendFitness(currentIndividualId, currentGen, finalFitness);
+        Debug.Log($"Gen {currentGen} Ind {currentIndividualId} | Fit: {finalFitnessNoZ:F3} | Dist: {distanceX:F2} | Torque Pen: {cumulativeTorque:F2} | Z-Pen: {cumulativeZDrift:F2}");
+        GetComponent<GenomeClient>().SendFitness(currentIndividualId, currentGen, finalFitnessNoZ);
     }
 
     private void ResetRobot()
