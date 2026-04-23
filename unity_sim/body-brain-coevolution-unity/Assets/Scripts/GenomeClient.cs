@@ -57,12 +57,8 @@ public class GenomeClient : MonoBehaviour
                 lastReceivedGeneration = response.generation; // Store the generation for fitness reporting
                 Debug.Log($"Gen {response.generation} | Received ID {response.individual_id}");
 
-                // TODO: Finish Genome Translator functionality
+                // Apply the morphology and brain
                 GenomeTranslator.Instance.ApplyGenome(response.dna);
-
-                // TODO: Placeholder: Wait 10 seconds in the simultation
-                float mockFitness = Random.Range(0f, 15f); // Mock fitness score for testing
-                SendFitness(response.individual_id, lastReceivedGeneration, mockFitness);
             }
         }
     }

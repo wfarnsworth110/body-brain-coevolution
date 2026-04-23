@@ -137,69 +137,18 @@ async def get_genome():
     ind = population[current_ind_index]
     return GenomeResponse(individual_id=current_ind_index, dna=list(ind), generation=current_generation, is_finished=False)
 
-    """
-    if current_generation > MAX_GENERATIONS:
-        return GenomeResponse(
-            individual_id=-1,
-            dna=[],
-            generation=current_generation,
-            is_finished=True
-        )
-
-    if current_ind_index >= len(population):
-        if current_generation >= MAX_GENERATIONS:
-            current_generation += 1
-            return GenomeResponse(
-                individual_id=-1,
-                dna=[],
-                generation=current_generation,
-                is_finished=True
-            )
-
-        offspring = toolbox.select(population, len(population))
-        offspring = [toolbox.clone(ind) for ind in offspring]
-
-        for i in range(1, len(offspring), 2):
-            if random.random() < CXPB:
-                offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1], offspring[i])
-                del offspring[i - 1].fitness.values
-                del offspring[i].fitness.values
-
-        for mutant in offspring:
-            toolbox.mutate(mutant)
-            del mutant.fitness.values
-
-        for ind in offspring:
-            for i in range(len(ind)):
-                ind[i] = max(0.0, min(1.0, ind[i]))
-
-        population[:] = offspring
-        current_generation += 1
-        current_ind_index = 0
-
-    ind = population[current_ind_index]
-    return GenomeResponse(
-        individual_id=current_ind_index,
-        dna=list(ind),
-        generation=current_generation,
-        is_finished=False
-    )
-    """
-
 @app.post("/post-fitness")
 async def post_fitness(report: FitnessReport):
     global current_ind_index
-    if report.individual_id >= 0 and report.individual_id < len(population):
-        population[report.individual_id].fitness.values = (report.fitness_score,)
-        current_ind_index += 1
 
-    """
+    # Reject scores from the wrong generation (catch race condition)
     if report.generation != current_generation:
         raise HTTPException(
             status_code=400,
             detail=f"Generation mismatch: expected {current_generation}, got {report.generation}"
         )
-
+    
+    # Reject scores for out-of-bounds IDs
     if report.individual_id < 0 or report.individual_id >= len(population):
         raise HTTPException(
             status_code=400,
@@ -209,8 +158,7 @@ async def post_fitness(report: FitnessReport):
     # Assign the fitness to the DEAP individual
     population[report.individual_id].fitness.values = (report.fitness_score,)
 
-    print(f"Gen {report.generation} | Ind {report.individual_id} scored: {report.fitness_score}")
+    print(f"Gen {report.generation} | Ind {report.individual_id} scored: {report.fitness_score:.3f}")
     current_ind_index += 1
-    """
 
     return {"Status": "Success"}
