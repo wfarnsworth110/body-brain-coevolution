@@ -1,15 +1,27 @@
 using UnityEngine;
 using System.Collections;
+using System;
 
 public class SimulationManager : MonoBehaviour
 {
     public static SimulationManager Instance;
 
+    // Trial parameters
     [Header("Trial Settings")]
     public float trialDuration = 10.0f;
     public float heightThreshold = 0.4f; // If the torso falls below this, trial ends
     public Transform torsoTransform;
 
+    // Fitness function information
+    [Header("Fitness Weights")]
+    public float w1_torque = 0.001f;
+    public float w2_zDrift = 0.5f;
+
+    private float cumulativeTorque = 0f;
+    private float cumulativeZDrift = 0f;
+    private ArticulationBody[] allBodies;
+
+    // State tracking
     private Vector3 startPosition;
     private bool isSimulating = false;
     private int currentIndividualId;
@@ -19,6 +31,13 @@ public class SimulationManager : MonoBehaviour
 
     public void BeginTrial(int id, int gen, float[] dna)
     {
+        // Use isSimulating to prevent overlapping trials
+        if (isSimulating)
+        {
+            Debug.LogWarning("Trial is already in progress. Ignoring.");
+            return;
+        }
+
         currentIndividualId = id;
         currentGen = gen;
 
@@ -27,6 +46,11 @@ public class SimulationManager : MonoBehaviour
 
         // 2. Morph the robot based on DNA
         GenomeTranslator.Instance.ApplyGenome(dna);
+
+        // 2.5 Initialize accumulators and cache bodies for torque calculation
+        cumulativeTorque = 0f;
+        cumulativeZDrift = 0f;
+        allBodies = torsoTransform.GetComponentsInChildren<ArticulationBody>();
 
         // 3. Start the timer
         startPosition = torsoTransform.position;
@@ -47,28 +71,49 @@ public class SimulationManager : MonoBehaviour
                 break;
             }
 
+            // Accumulate torque and z-drift for fitness calculation
+            float currentZDrift = Mathf.Abs(torsoTransform.position.z - startPosition.z);
+            cumulativeZDrift += (w2_zDrift * currentZDrift);
+
+            float currentTorque = 0f;
+            foreach (ArticulationBody body in allBodies)
+            {
+                if (!body.isRoot && body.dofCount > 0)
+                {
+                    currentTorque += Mathf.Abs(body.jointForce[0]);
+                }
+            }
+            cumulativeTorque += (w1_torque * currentTorque);
+
             elapsed += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
         }
 
-        EndTrial();
+        EndTrial(elapsed);
     }
 
-    private void EndTrial()
+    private void EndTrial(float timeElapsed)
     {
         isSimulating = false;
 
-        // Calculate Fitness: Simple X-distance traveled
         float distanceX = torsoTransform.position.x - startPosition.x;
 
-        // Penalize for drifting off the z-axis (lateral instability)
-        float penaltyZ = Mathf.Abs(torsoTransform.position.z - startPosition.z) * 0.5f;
+        // Prevent division by zero
+        float validTime = Mathf.Max(0.1f, timeElapsed);
 
-        float finalFitness = Mathf.Max(0, distanceX - penaltyZ);
+        /*
+            Fitness function:
+            F = (distanceX / timeElapsed) - (w1 * cumulativeTorque) - (w2 * cumulativeZDrift)
+            - distanceX / timeElapsed rewards forward movement speed.
+            - w1 * cumulativeTorque penalizes excessive torque usage.
+            - w2 * cumulativeZDrift penalizes drifting away from the center line.
+        */
+        float finalFitness = (distanceX / validTime) - cumulativeTorque - cumulativeZDrift;
 
-        Debug.Log($"Trial Done. Fitness: {finalFitness}");
+        // Ensure fitness is not negative
+        finalFitness = Mathf.Max(0f, finalFitness);
 
-        // Report back to the Python server via GenomeClient
+        Debug.Log($"Gen {currentGen} Ind {currentIndividualId} | Fit: {finalFitness:F3} | Dist: {distanceX:F2} | Torque Pen: {cumulativeTorque:F2} | Z-Pen: {cumulativeZDrift:F2}");
         GetComponent<GenomeClient>().SendFitness(currentIndividualId, currentGen, finalFitness);
     }
 
@@ -127,5 +172,34 @@ public class SimulationManager : MonoBehaviour
         Debug.Log("Testing random individual");
 
         BeginTrial(888, 1, randomDNA);
+    }
+
+    // Load HOF JSON file directly into Unity
+    [System.Serializable]
+    public class EliteData { public int rank; public float fitness; public float[] dna; }
+    [System.Serializable]
+    public class EliteList { public EliteData[] elites; }
+
+    [Header("Playback")]
+    public TextAsset eliteJsonFile; // Drag exported JSON file here in the inspector
+    public int eliteRankToPlay = 1; // Change to 2, 3, etc. to play different elites
+
+    [ContextMenu("Play Elite from JSON")]
+    public void PlayElite() {
+        if (eliteJsonFile == null) return;
+
+        // Wrap the JSON array in an object for Unity's JsonUtility
+        string wrappedJson = "{\"elites\":" + eliteJsonFile.text + "}";
+        EliteList eliteList = JsonUtility.FromJson<EliteList>(wrappedJson);
+
+        foreach (var elite in eliteList.elites)
+        {
+            if (elite.rank == eliteRankToPlay)
+            {
+                Debug.Log($"Playing Elite Rank {elite.rank} with Fitness {elite.fitness}");
+                BeginTrial(999, 999, elite.dna);
+                return;
+            }
+        }
     }
 }

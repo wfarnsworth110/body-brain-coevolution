@@ -1565,6 +1565,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8a73dce317cb425e9cbedefd66564f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  trainingTimeScale: 10
 --- !u!114 &1933386524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1580,6 +1581,10 @@ MonoBehaviour:
   trialDuration: 10
   heightThreshold: 0.4
   torsoTransform: {fileID: 2145487440}
+  w1_torque: 0.001
+  w2_zDrift: 0.5
+  eliteJsonFile: {fileID: 0}
+  eliteRankToPlay: 1
 --- !u!1 &2145487436
 GameObject:
   m_ObjectHideFlags: 0
@@ -1790,6 +1795,8 @@ MonoBehaviour:
   kneeOffset: 45
   ankleAmplitude: 20
   ankleOffset: 5
+  trialDuration: 10
+  torsoTransform: {fileID: 0}
 --- !u!114 &2145487443
 MonoBehaviour:
   m_ObjectHideFlags: 0

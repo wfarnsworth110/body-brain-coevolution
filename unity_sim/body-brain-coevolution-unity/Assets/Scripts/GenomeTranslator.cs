@@ -5,6 +5,8 @@ using UnityEngine;
 public class GenomeTranslator : MonoBehaviour
 {
     /*
+        NOTE: Keep leftover genes as junk DNA for the duration of the experiment.
+
         Genome: 128 floats between 0 and 1
         First 64: Physical morphology
             56 floats for each of the 7 segments:
