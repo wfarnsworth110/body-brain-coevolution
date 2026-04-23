@@ -1516,8 +1516,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1933386522}
-  - component: {fileID: 1933386521}
   - component: {fileID: 1933386523}
+  - component: {fileID: 1933386521}
+  - component: {fileID: 1933386524}
   m_Layer: 0
   m_Name: EvolutionManager
   m_TagString: Untagged
@@ -1564,6 +1565,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8a73dce317cb425e9cbedefd66564f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+--- !u!114 &1933386524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1933386520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: beee38055c8464527b3fe3593a50cb17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MainProject::SimulationManager
+  trialDuration: 10
+  heightThreshold: 0.4
+  torsoTransform: {fileID: 2145487440}
 --- !u!1 &2145487436
 GameObject:
   m_ObjectHideFlags: 0
@@ -1578,6 +1594,9 @@ GameObject:
   - component: {fileID: 2145487437}
   - component: {fileID: 2145487441}
   - component: {fileID: 2145487442}
+  - component: {fileID: 2145487444}
+  - component: {fileID: 2145487443}
+  - component: {fileID: 2145487445}
   m_Layer: 0
   m_Name: ATLAS
   m_TagString: Untagged
@@ -1753,7 +1772,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2145487436}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f8185ecb7815c493a9e55001723faa13, type: 3}
   m_Name: 
@@ -1771,6 +1790,51 @@ MonoBehaviour:
   kneeOffset: 45
   ankleAmplitude: 20
   ankleOffset: 5
+--- !u!114 &2145487443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145487436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d872ccf8ed3b646a0bbb52830d405c76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MainProject::NeuralController
+--- !u!114 &2145487444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145487436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be7e2e4c92fe9491fa53997d89cf2e7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MainProject::GenomeTranslator
+  torso: {fileID: 2145487441}
+  leftThigh: {fileID: 1179120523}
+  rightThigh: {fileID: 1147765089}
+  leftCalf: {fileID: 898088085}
+  rightCalf: {fileID: 195997617}
+  leftFoot: {fileID: 160107559}
+  rightFoot: {fileID: 1623242478}
+  brain: {fileID: 2145487443}
+  globalMotorMultiplier: 1
+--- !u!114 &2145487445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145487436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98cc0309c3e6e48b891b83a711de479f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
