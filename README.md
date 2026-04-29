@@ -8,10 +8,9 @@ cd python_backend
 ./run_backend.sh
 
 2. Python endpoints
-Navigate to http://localhost:8000/docs
-get_genome -> Try it out -> Execute
+View at http://localhost:8000/docs
 
 3. Unity project
 Open project stored in /unity_sim/body-brain-coevolution-unity/
 Select the play/run button
-Watch for correspondence between Unity project console and terminal running Dockerfile
+Watch for correspondence between Unity project console and terminal running Dockerfile (FastAPI connects to Assets/Scripts/GenomeClient.cs)
